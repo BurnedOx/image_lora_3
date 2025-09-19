@@ -23,7 +23,13 @@ def load_pipeline(model_path: str, base_model: str = "runwayml/stable-diffusion-
     )
     
     # Load LoRA weights
-    if os.path.exists(model_path):
+    adapter_model_path = os.path.join(model_path, "adapter_model.safetensors")
+    if os.path.exists(adapter_model_path):
+        # Load LoRA weights using the new method for safetensors format
+        pipe.load_lora_weights(model_path)
+        print(f"Loaded LoRA weights from {model_path}")
+    elif os.path.exists(os.path.join(model_path, "pytorch_lora_weights.bin")):
+        # Fallback to old format
         pipe.unet.load_attn_procs(model_path)
         print(f"Loaded LoRA weights from {model_path}")
     else:
