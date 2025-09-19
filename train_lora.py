@@ -148,6 +148,7 @@ def main():
         prompt=args.prompt,
         tokenizer=tokenizer,
         size=args.resolution,
+        placeholder_token=args.placeholder_token,
     )
     
     train_dataloader = DataLoader(

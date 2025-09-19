@@ -73,7 +73,8 @@ class ImageLoRADataset(Dataset):
         return {
             "pixel_values": image,
             "text": text,
-            "image_path": str(image_path)
+            "image_path": str(image_path),
+            "tokenizer": self.tokenizer
         }
 
 class PromptDataset(Dataset):
@@ -99,9 +100,28 @@ def collate_fn(examples):
     
     texts = [example["text"] for example in examples]
     
+    # Tokenize the texts
+    tokenizer = examples[0]["tokenizer"] if "tokenizer" in examples[0] else None
+    
+    # Find tokenizer from the first example
+    if tokenizer is None:
+        # This is a fallback - ideally tokenizer should be passed via dataset
+        from transformers import CLIPTokenizer
+        tokenizer = CLIPTokenizer.from_pretrained("runwayml/stable-diffusion-v1-5", subfolder="tokenizer")
+    
+    # Tokenize all texts
+    inputs = tokenizer(
+        texts,
+        padding="max_length",
+        max_length=tokenizer.model_max_length,
+        truncation=True,
+        return_tensors="pt"
+    )
+    
     return {
         "pixel_values": pixel_values,
-        "text": texts,
+        "input_ids": inputs.input_ids,
+        "attention_mask": inputs.attention_mask,
     }
 
 def prepare_dataset(
