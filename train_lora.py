@@ -137,7 +137,7 @@ def main():
         target_modules=["to_k", "to_q", "to_v", "to_out.0"],
         lora_dropout=args.lora_dropout,
         bias="none",
-        task_type="CAUSAL_LM"
+        task_type=None
     )
     
     unet = get_peft_model(unet, lora_config)
